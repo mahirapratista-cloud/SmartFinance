@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFinance - Manajemen Keuangan Pintar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-bg: #ecf0f1;
+            --dark-text: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+        }
+
+        .navbar {
+            background-color: var(--primary-color) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,.08);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            border-radius: 25px;
+            padding: 0.5rem 2rem;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 0 1rem;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .step.active .step-circle {
+            background-color: var(--secondary-color);
+        }
+
+        .step-line {
+            width: 50px;
+            height: 2px;
+            background-color: #ddd;
+            margin: 0 0.5rem;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,.08);
+        }
+
+        .result-positive {
+            border-left: 5px solid var(--success-color);
+        }
+
+        .result-negative {
+            border-left: 5px solid var(--danger-color);
+        }
+
+        .result-warning {
+            border-left: 5px solid var(--warning-color);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 2rem 0;
+        }
+
+        .recommendation-item {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .recommendation-item h5 {
+            color: var(--primary-color);
+        }
+
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group-text {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .progress {
+            height: 25px;
+            border-radius: 15px;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar {
+            border-radius: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="bi bi-wallet2"></i> SmartFinance</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" onclick="showSection('home')">Beranda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('input')">Input Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('result')">Hasil Analisis</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-4">Kelola Keuangan Anda dengan Pintar</h1>
+            <p class="lead">Analisis keuangan pribadi, dapatkan rekomendasi tepat, dan raih tujuan finansial Anda</p>
+            <button class="btn btn-light btn-lg mt-3" onclick="showSection('input')">
+                <i class="bi bi-calculator"></i> Mulai Analisis
+            </button>
+        </div>
+    </section>
+
+    <div class="container">
+        <!-- Home Section -->
+        <section id="home" class="content-section">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-graph-up-arrow display-4 text-primary mb-3"></i>
+                            <h4>Analisis Mendalam</h4>
+                            <p>Pahami kondisi keuangan Anda dengan analisis komprehensif pendapatan dan pengeluaran</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-lightbulb display-4 text-warning mb-3"></i>
+                            <h4>Rekomendasi Pintar</h4>
+                            <p>Dapatkan saran personal untuk mengelola hutang, menabung, dan berinvestasi</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-target display-4 text-success mb-3"></i>
+                            <h4>Rencana Masa Depan</h4>
+                            <p>Buat perencanaan keuangan jangka panjang untuk mencapai tujuan finansial Anda</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-lg-6">
+                    <h3 class="mb-4">Bagaimana Cara Kerjanya?</h3>
+                    <div class="step-indicator">
+                        <div class="step active">
+                            <div class="step-circle">1</div>
+                            <span class="ms-2">Input Data</span>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step">
+                            <div class="step-circle">2</div>
+                            <span class="ms-2">Analisis</span>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step">
+                            <div class="step-circle">3</div>
+                            <span class="ms-2">Rekomendasi</span>
+                        </div>
+                    </div>
+                    <ul class="list-unstyled mt-4">
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success"></i> Masukkan data pendapatan dan pengeluaran Anda</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success"></i> Sistem akan menganalisis kondisi keuangan Anda</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success"></i> Dapatkan rekomendasi yang dipersonalisasi</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success"></i> Buat rencana aksi untuk mencapai tujuan</li>
+                    </ul>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Testimoni Pengguna</h5>
+                            <blockquote class="blockquote mb-0">
+                                <p>"SmartFinance membantu saya mengelola hutang dan mulai menabung. Sangat direkomendasikan!"</p>
+                                <footer class="blockquote-footer">Andi Pratama <cite title="Source Title">Profesional Muda</cite></footer>
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Input Section -->
+        <section id="input" class="content-section hidden">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0"><i class="bi bi-pencil-square"></i> Input Data Keuangan</h3>
+                </div>
+                <div class="card-body">
+                    <form id="financeForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Pendapatan</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Gaji/Bulan</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" class="form-control" id="salary" placeholder="Contoh: 10000000" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Pendapatan Lainnya</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" class="form-control" id="otherIncome" placeholder="Contoh: 2000000">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Pengeluaran</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Kebutuhan Rumah Tangga</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" class="form-control" id="household" placeholder="Contoh: 3000000" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Transportasi</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" class="form-control" id="transport" placeholder="Contoh: 1000000">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Lainnya</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" class="form-control" id="otherExpense" placeholder="Contoh: 1500000">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Data Pinjaman</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Total Pinjaman</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" class="form-control" id="totalLoan" placeholder="Contoh: 50000000">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Cicilan/Bulan</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" class="form-control" id="monthlyPayment" placeholder="Contoh: 2000000">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Pajak & Lainnya</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Pajak/Bulan</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" class="form-control" id="tax" placeholder="Contoh: 1000000">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Target Tabungan/Bulan</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" class="form-control" id="savingsTarget" placeholder="Contoh: 2000000">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-calculator"></i> Analisis Keuangan Saya
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result Section -->
+        <section id="result" class="content-section hidden">
+            <div id="resultContent"></div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>SmartFinance</h5>
+                    <p>Platform manajemen keuangan pribadi yang membantu Anda mencapai kesejahteraan finansial</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2024 SmartFinance. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let financeData = {};
+        let balanceChart = null;
+
+        // Show section
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('fade-in');
+            
+            // Update navbar
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Form submission
+        document.getElementById('financeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect data
+            financeData = {
+                salary: parseFloat(document.getElementById('salary').value) || 0,
+                otherIncome: parseFloat(document.getElementById('otherIncome').value) || 0,
+                household: parseFloat(document.getElementById('household').value) || 0,
+                transport: parseFloat(document.getElementById('transport').value) || 0,
+                otherExpense: parseFloat(document.getElementById('otherExpense').value) || 0,
+                totalLoan: parseFloat(document.getElementById('totalLoan').value) || 0,
+                monthlyPayment: parseFloat(document.getElementById('monthlyPayment').value) || 0,
+                tax: parseFloat(document.getElementById('tax').value) || 0,
+                savingsTarget: parseFloat(document.getElementById('savingsTarget').value) || 0
+            };
+            
+            // Calculate totals
+            financeData.totalIncome = financeData.salary + financeData.otherIncome;
+            financeData.totalExpense = financeData.household + financeData.transport + financeData.otherExpense + financeData.tax + financeData.monthlyPayment;
+            financeData.balance = financeData.totalIncome - financeData.totalExpense;
+            
+            // Generate analysis
+            generateAnalysis();
+            
+            // Show result section
+            showSection('result');
+        });
+
+        // Generate analysis
+        function generateAnalysis() {
+            const resultContent = document.getElementById('resultContent');
+            let html = '';
+            
+            // Summary card
+            html += `
+                <div class="result-card ${financeData.balance >= 0 ? 'result-positive' : 'result-negative'}">
+                    <h3><i class="bi bi-graph-up"></i> Ringkasan Keuangan</h3>
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5>Total Pendapatan</h5>
+                                <h2 class="text-success">Rp ${formatNumber(financeData.totalIncome)}</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5>Total Pengeluaran</h5>
+                                <h2 class="text-danger">Rp ${formatNumber(financeData.totalExpense)}</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5>Sisa Bulanan</h5>
+                                <h2 class="${financeData.balance >= 0 ? 'text-success' : 'text-danger'}">Rp ${formatNumber(financeData.balance)}</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5>Status</h5>
+                                <h2 class="${financeData.balance >= 0 ? 'text-success' : 'text-danger'}">${financeData.balance >= 0 ? 'Surplus' : 'Defisit'}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Chart
+            html += `
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-pie-chart"></i> Visualisasi Keuangan</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="balanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Analysis based on flowchart
+            if (financeData.balance < 0) {
+                html += generateDeficitAnalysis();
+            } else {
+                html += generateSurplusAnalysis();
+            }
+            
+            resultContent.innerHTML = html;
+            
+            // Create chart
+            createChart();
+        }
+
+        // Generate deficit analysis
+        function generateDeficitAnalysis() {
+            let html = `
+                <div class="result-card result-negative">
+                    <h3><i class="bi bi-exclamation-triangle"></i> Analisis Defisit Keuangan</h3>
+                    <p class="lead">Pendapatan Anda lebih kecil dari pengeluaran. Berikut analisis dan rekomendasi:</p>
+                    
+                    <div class="recommendation-item">
+                        <h5><i class="bi bi-search"></i> Identifikasi Masalah</h5>
+                        <ul>
+                            <li>Defisit bulanan: Rp ${formatNumber(Math.abs(financeData.balance))}</li>
+                            <li>Rasio pengeluaran terhadap pendapatan: ${((financeData.totalExpense / financeData.totalIncome) * 100).toFixed(1)}%</li>
+                            <li>Pengeluaran terbesar: ${getLargestExpense()}</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="recommendation-item">
+                        <h5><i class="bi bi-lightbulb"></i> Rekomendasi Tindakan</h5>
+                        <ol>
+                            <li><strong>Kurangi Pengeluaran:</strong>
+                                <ul>
+                                    <li>Evaluasi pengeluaran rumah tangga (saat ini Rp ${formatNumber(financeData.household)})</li>
+                                    <li>Cari alternatif transportasi yang lebih murah</li>
+                                    <li>Hindari pembelian tidak perlu</li>
+                                </ul>
+                            </li>
+                            <li><strong>Tingkatkan Pendapatan:</strong>
+                                <ul>
+                                    <li>Cari pekerjaan sampingan atau freelance</li>
+                                    <li>Negosiasikan kenaikan gaji</li>
+                                    <li>Manfaatkan skill untuk tambahan income</li>
+                                </ul>
+                            </li>
+                            <li><strong>Atur Ulang Prioritas:</strong>
+                                <ul>
+                                    <li>Fokus pada kebutuhan dasar terlebih dahulu</li>
+                                    <li>Tunda pembelian barang mewah</li>
+                                    <li>Evaluasi kembali cicilan pinjaman</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    <div class="recommendation-item">
+                        <h5><i class="bi bi-calendar-check"></i> Rencana Aksi 30 Hari</h5>
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                        <ul>
+                            <li>Minggu 1: Cat semua pengeluaran dan identifikasi yang bisa dikurangi</li>
+                            <li>Minggu 2: Terapkan penghematan di kategori terbesar</li>
+                            <li>Minggu 3: Cari sumber pendapatan tambahan</li>
+                            <li>Minggu 4: Evaluasi progress dan atur ulang anggaran</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        // Generate surplus analysis
+        function generateSurplusAnalysis() {
+            let html = '';
+            
+            // Check for large debt
+            const hasLargeDebt = financeData.totalLoan > financeData.totalIncome * 6; // If debt > 6x monthly income
+            
+            if (hasLargeDebt) {
+                html += `
+                    <div class="result-card result-warning">
+                        <h3><i class="bi bi-credit-card"></i> Strategi Pengurangan Hutang</h3>
+                        <p class="lead">Anda memiliki surplus namun hutang yang signifikan. Prioritaskan pelunasan hutang.</p>
+                        
+                        <div class="recommendation-item">
+                            <h5><i class="bi bi-calculator"></i> Analisis Hutang</h5>
+                            <ul>
+                                <li>Total hutang: Rp ${formatNumber(financeData.totalLoan)}</li>
+                                <li>Cicilan bulanan: Rp ${formatNumber(financeData.monthlyPayment)}</li>
+                                <li>Rasio cicilan terhadap pendapatan: ${((financeData.monthlyPayment / financeData.totalIncome) * 100).toFixed(1)}%</li>
+                                <li>Perkiraan waktu pelunasan: ${Math.ceil(financeData.totalLoan / financeData.monthlyPayment)} bulan</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="recommendation-item">
+                            <h5><i class="bi bi-lightbulb"></i> Strategi Pelunasan</h5>
+                            <ol>
+                                <li><strong>Metode Avalanche:</strong>
+                                    <ul>
+                                        <li>Fokus pada hutang dengan bunga tertinggi</li>
+                                        <li>Gunakan surplus untuk tambahan pembayaran</li>
+                                        <li>Minimal: alokasikan 50% surplus untuk hutang</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Renegosiasi Hutang:</strong>
+                                    <ul>
+                                        <li>Negosiasikan suku bunga lebih rendah</li>
+                                        <li>Pertimbangkan konsolidasi hutang</li>
+                                        <li>Cari opsi refinancing dengan bunga lebih baik</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Tingkatkan Pembayaran:</strong>
+                                    <ul>
+                                        <li>Alokasikan Rp ${formatNumber(financeData.balance * 0.7)} tambahan per bulan</li>
+                                        <li>Perkiraan penghematan bunga: Rp ${formatNumber(calculateInterestSavings())}</li>
+                                        <li>Percepat pelunasan: ${Math.ceil(financeData.totalLoan / (financeData.monthlyPayment + (financeData.balance * 0.7)))} bulan</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="result-card result-positive">
+                        <h3><i class="bi bi-piggy-bank"></i> Rekomendasi Tabungan & Investasi</h3>
+                        <p class="lead">Kondisi keuangan Anda sehat! Berikut rekomendasi untuk mengembangkan aset:</p>
+                        
+                        <div class="recommendation-item">
+                            <h5><i class="bi bi-shield-check"></i> Dana Darurat</h5>
+                            <ul>
+                                <li>Target: 6x pengeluaran bulanan = Rp ${formatNumber(financeData.totalExpense * 6)}</li>
+                                <li>Surplus bulanan: Rp ${formatNumber(financeData.balance)}</li>
+                                <li>Waktu mencapai target: ${Math.ceil((financeData.totalExpense * 6) / financeData.balance)} bulan</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="recommendation-item">
+                            <h5><i class="bi bi-graph-up-arrow"></i> Alokasi Investasi</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Rekomendasi Portofolio</h6>
+                                    <ul>
+                                        <li>40% Reksa Dana Saham (pertumbuhan)</li>
+                                        <li>30% Reksa Dana Pendapatan Tetap (stabilitas)</li>
+                                        <li>20% Deposito (aman)</li>
+                                        <li>10% Emas (hedging)</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Alokasi Bulanan</h6>
+                                    <ul>
+                                        <li>Investasi: Rp ${formatNumber(financeData.balance * 0.5)}</li>
+                                        <li>Tabungan: Rp ${formatNumber(financeData.balance * 0.3)}</li>
+                                        <li>Flexible: Rp ${formatNumber(financeData.balance * 0.2)}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Goal evaluation section
+            html += `
+                <div class="result-card">
+                    <h3><i class="bi bi-bullseye"></i> Evaluasi Target Keuangan</h3>
+                    
+                    <div class="recommendation-item">
+                        <h5>Target Tabungan Bulanan</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Target: Rp ${formatNumber(financeData.savingsTarget)}</span>
+                            <span>Kemampuan: Rp ${formatNumber(financeData.balance)}</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar ${financeData.balance >= financeData.savingsTarget ? 'bg-success' : 'bg-warning'}" 
+                                 role="progressbar" 
+                                 style="width: ${Math.min((financeData.balance / financeData.savingsTarget) * 100, 100)}%" 
+                                 aria-valuenow="${Math.min((financeData.balance / financeData.savingsTarget) * 100, 100)}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                ${Math.min(Math.round((financeData.balance / financeData.savingsTarget) * 100), 100)}%
+                            </div>
+                        </div>
+                        ${financeData.balance < financeData.savingsTarget ? 
+                            '<p class="text-warning mt-2"><i class="bi bi-exclamation-circle"></i> Target melebihi kemampuan saat ini. Pertimbangkan untuk menyesuaikan target.</p>' : 
+                            '<p class="text-success mt-2"><i class="bi bi-check-circle"></i> Target realistis dan dapat dicapai!</p>'
+                        }
+                    </div>
+                    
+                    <div class="recommendation-item">
+                        <h5><i class="bi bi-clipboard-data"></i> Rangkuman Solusi</h5>
+                        <ol>
+                            <li><strong>Prioritas Utama:</strong> ${hasLargeDebt ? 'Pelunasan hutang dengan bunga tinggi' : 'Membangun dana darurat'}</li>
+                            <li><strong>Alokasi Surplus:</strong> 
+                                <ul>
+                                    <li>${hasLargeDebt ? '70% untuk pelunasan hutang' : '50% untuk investasi'}</li>
+                                    <li>20% untuk tabungan</li>
+                                    <li>10% untuk dana flexible</li>
+                                </ul>
+                            </li>
+                            <li><strong>Target 1 Tahun:</strong> 
+                                <ul>
+                                    <li>${hasLargeDebt ? 'Kurangi hutang minimal 30%' : 'Akumulasi dana darurat minimal 3x pengeluaran'}</li>
+                                    <li>Mulai portofolio investasi</li>
+                                    <li>Tingkatkan financial literacy</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        // Create chart
+        function createChart() {
+            const ctx = document.getElementById('balanceChart').getContext('2d');
+            
+            if (balanceChart) {
+                balanceChart.destroy();
+            }
+            
+            balanceChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pendapatan', 'Pengeluaran'],
+                    datasets: [{
+                        data: [financeData.totalIncome, financeData.totalExpense],
+                        backgroundColor: ['#27ae60', '#e74c3c'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': Rp ' + formatNumber(context.raw);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Helper functions
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function getLargestExpense() {
+            const expenses = [
+                { name: 'Rumah Tangga', value: financeData.household },
+                { name: 'Transportasi', value: financeData.transport },
+                { name: 'Lainnya', value: financeData.otherExpense },
+                { name: 'Pajak', value: financeData.tax },
+                { name: 'Cicilan', value: financeData.monthlyPayment }
+            ];
+            
+            return expenses.reduce((prev, current) => (prev.value > current.value) ? prev : current).name;
+        }
+
+        function calculateInterestSavings() {
+            // Simplified interest calculation (assuming 12% annual interest)
+            const monthlyInterest = 0.12 / 12;
+            const originalMonths = Math.ceil(financeData.totalLoan / financeData.monthlyPayment);
+            const newMonthlyPayment = financeData.monthlyPayment + (financeData.balance * 0.7);
+            const newMonths = Math.ceil(financeData.totalLoan / newMonthlyPayment);
+            
+            // Rough estimate of interest saved
+            return Math.round((originalMonths - newMonths) * financeData.totalLoan * monthlyInterest);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showSection('home');
+        });
+    </script>
+</body>
+</html>
